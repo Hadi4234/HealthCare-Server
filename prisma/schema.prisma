@@ -1,255 +1,94 @@
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "mysql" // You can also use MySQL or SQLite
   url      = env("DATABASE_URL")
 }
 
-model brands {
-  id        String        @id @default(uuid())
-  brandName String     @unique @db.VarChar(50)
-  brandImg  String     @db.VarChar(300)
-  createdAt DateTime   @default(now()) @db.Timestamp(0)
-  updatedAt DateTime   @default(now()) @updatedAt @db.Timestamp(0)
-  products  products[]
-}
-
-model categories {
-  id           String        @id @default(uuid())
-  categoryName String     @unique @db.VarChar(50)
-  categoryImg  String     @db.VarChar(300)
-  createdAt    DateTime   @default(now()) @db.Timestamp(0)
-  updatedAt    DateTime   @default(now()) @updatedAt @db.Timestamp(0)
-  products     products[]
-}
-
-model products {
-  id             String             @id @default(uuid())
-  title          String          @db.VarChar(200)
-  short_des      String          @db.VarChar(500)
-  price          Float
-  discount       Boolean
-  discount_price Float
-  image          String          @db.VarChar(200)
-  stock          Boolean
-  star           Float
-  remark         products_remark
-  category_id    String
-  brand_id       String
-  createdAt      DateTime        @default(now()) @db.Timestamp(0)
-  updatedAt      DateTime        @default(now()) @updatedAt @db.Timestamp(0)
-
-  invoice_products invoice_products[]
-  product_carts    product_carts[]
-  product_details  product_details?
-  product_reviews  product_reviews[]
-  product_sliders  product_sliders?
-  product_wishes   product_wishes[]
-
-  brands     brands     @relation(fields: [brand_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  categories categories @relation(fields: [category_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-}
-
-model product_details {
-  id         String      @id @default(uuid())
-  img1       String   @db.VarChar(200)
-  img2       String   @db.VarChar(200)
-  img3       String   @db.VarChar(200)
-  img4       String   @db.VarChar(200)
-  img5       String   @db.VarChar(200)
-  img6       String   @db.VarChar(200)
-  img7       String   @db.VarChar(200)
-  img8       String   @db.VarChar(200)
-  des        String   @db.LongText
-  color      String   @db.VarChar(200)
-  size       String   @db.VarChar(200)
-  product_id String      @unique
-  createdAt  DateTime @default(now()) @db.Timestamp(0)
-  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(0)
-  products   products @relation(fields: [product_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-}
-
-model product_sliders {
-  id         String      @id @default(uuid())
-  title      String   @db.VarChar(200)
-  short_des  String   @db.VarChar(500)
-  price      String   @db.VarChar(100)
-  image      String   @db.VarChar(200)
-  product_id String      @unique
-  createdAt  DateTime @default(now()) @db.Timestamp(0)
-  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(0)
-  products   products @relation(fields: [product_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-}
-
-model users {
-  id        String      @id @default(uuid())
-  email     String   @unique
-  password  String
-  role      ROLE     @default(USER)   
-  otp       String?   @db.VarChar(10)
-  createdAt DateTime @default(now()) @db.Timestamp(0)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
-
-  customer_profiles customer_profiles?
-  invoice_products  invoice_products[]
-  invoices          invoices[]
-  product_carts     product_carts[]
-  product_wishes    product_wishes[]
-}
-
-enum ROLE {
-  USER
-  ADMIN
-  SELLER
-}
-
-model customer_profiles {
-  id            String    @id @default(uuid())
-  cus_name      String @db.VarChar(100)
-  cus_add       String @db.VarChar(500)
-  cus_city      String @db.VarChar(50)
-  cus_state     String @db.VarChar(50)
-  cus_postcode  String @db.VarChar(50)
-  cus_country   String @db.VarChar(50)
-  cus_phone     String @db.VarChar(50)
-  cus_fax       String @db.VarChar(50)
-  ship_name     String @db.VarChar(100)
-  ship_add      String @db.VarChar(100)
-  ship_city     String @db.VarChar(100)
-  ship_state    String @db.VarChar(100)
-  ship_postcode String @db.VarChar(100)
-  ship_country  String @db.VarChar(100)
-  ship_phone    String @db.VarChar(50)
-  user_id       String    @unique
-  users         users  @relation(fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-
-  createdAt DateTime @default(now()) @db.Timestamp(0)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
-
-  product_reviews product_reviews[]
-}
-
-model product_carts {
-  id         String      @id @default(uuid())
-  user_id    String
-  product_id String
-  color      String   @db.VarChar(200)
-  size       String   @db.VarChar(200)
-  qty        Float
-  createdAt  DateTime @default(now()) @db.Timestamp(0)
-  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(0)
-  products   products @relation(fields: [product_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  users      users    @relation(fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-}
-
-model product_wishes {
-  id         String      @id @default(uuid())
-  product_id String
-  user_id    String
-  createdAt  DateTime @default(now()) @db.Timestamp(0)
-  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(0)
-  products   products @relation(fields: [product_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  users      users    @relation(fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-}
-
-model product_reviews {
-  id          String    @id @default(uuid())
-  description String @db.VarChar(1000)
-  rating      String @db.VarChar(10)
-  customer_id String
-  product_id  String
-
-  createdAt DateTime @default(now()) @db.Timestamp(0)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
-
-  customer_profiles customer_profiles @relation(fields: [customer_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  products          products          @relation(fields: [product_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-}
-
-model invoices {
-  id               String                      @id @default(uuid())
-  total            Float
-  vat              Float
-  payable          Float
-  cus_details      String                   @db.VarChar(500)
-  ship_details     String                   @db.VarChar(500)
-  tran_id          String                   @db.VarChar(100)
-  val_id           String                   @default("0") @db.VarChar(100)
-  delivery_status  invoices_delivery_status
-  payment_status   String                   @db.VarChar(255)
-  user_id          String
-  createdAt        DateTime                 @default(now()) @db.Timestamp(0)
-  updatedAt        DateTime                 @default(now()) @updatedAt @db.Timestamp(0)
-  invoice_products invoice_products[]
-  users            users                    @relation(fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-}
-
-model invoice_products {
-  id         String    @id @default(uuid())
-  invoice_id String
-  product_id String
-  user_id    String
-  qty        Float
-  sale_price Float
-  color      String @db.VarChar(50)
-  size       String @db.VarChar(50)
-
-  createdAt DateTime @default(now()) @db.Timestamp(0)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(0)
-
-  invoices invoices @relation(fields: [invoice_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  products products @relation(fields: [product_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  users    users    @relation(fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-}
-
-model policies {
-  id   String           @id @default(uuid())
-  type policies_type
-  des  String        @db.LongText
-}
-
-model sslcommerz_accounts {
-  id           String      @id @default(uuid())
-  store_id     String   @db.VarChar(255)
-  store_passwd String   @db.VarChar(255)
-  currency     String   @db.VarChar(255)
-  success_url  String   @db.VarChar(255)
-  fail_url     String   @db.VarChar(255)
-  cancel_url   String   @db.VarChar(255)
-  ipn_url      String   @db.VarChar(255)
-  init_url     String   @db.VarChar(255)
-  createdAt    DateTime @default(now()) @db.Timestamp(0)
-  updatedAt    DateTime @default(now()) @updatedAt @db.Timestamp(0)
-}
-
-model features {
-  id          String    @id @default(uuid())
+model Product {
+  id          Int              @id @default(autoincrement())
   name        String
-  img         String @db.VarChar(300)
-  description String @db.LongText
+  image     String    @default("https://placehold.co/600x400.png")
+  description String?
+  categoryId  Int
+  category    Category         @relation(fields: [categoryId], references: [id])
+  price       Float
+  variants    ProductVariant[]
+  reviews     Review[]         // A product can have multiple reviews
 }
 
-enum policies_type {
-  about
-  refund
-  terms
-  contact
-  complain
+model ProductVariant {
+  id        Int       @id @default(autoincrement())
+  image     String    @default("https://placehold.co/600x400.png")
+  productId Int
+  product   Product   @relation(fields: [productId], references: [id])
+  colorId   Int
+  color     Color     @relation(fields: [colorId], references: [id])
+  sizes     SizeVariant[]
+
+  // color will be a color string
+  // productVariant can have a price depending on color
+  // condition will be like ## if(product.variants.id.price){ product.price === variants.id.price}
 }
 
-enum invoices_delivery_status {
-  Pending
-  Processing
-  Completed
+model SizeVariant {
+  id        Int     @id @default(autoincrement())
+  sizeId    Int
+  size      Size    @relation(fields: [sizeId], references: [id])
+  variantId Int
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  stock     Int
+  price     Float
+  // size will be a string not array for multiple sizes , like 40,41,42,43 or s,m,l,xl etc
 }
 
-enum products_remark {
-  popular
-  new
-  top
-  special
-  trending
-  regular
+model Color {
+  id    Int      @id @default(autoincrement())
+  name  String   @unique
+  hex   String?
+  variants ProductVariant[]
 }
+
+model Size {
+  id    Int      @id @default(autoincrement())
+  name  String   @unique
+  sizeVariants SizeVariant[]
+}
+
+model Category {
+  id            Int        @id @default(autoincrement())
+  name          String
+  parentId      Int?       // Nullable for top-level categories
+  parent        Category?  @relation("Subcategories", fields: [parentId], references: [id])
+  subcategories Category[] @relation("Subcategories")
+  products      Product[]
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  name      String?
+  role      Role      @default(CUSTOMER) // Default role is CUSTOMER
+  reviews   Review[]  // A user can write multiple reviews
+}
+
+model Review {
+  id        Int       @id @default(autoincrement())
+  rating    Int       // Rating between 1 and 5
+  comment   String?
+  productId Int
+  product   Product   @relation(fields: [productId], references: [id])
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+

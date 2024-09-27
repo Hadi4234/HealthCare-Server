@@ -9,58 +9,57 @@ import prisma from '../shared/prisma';
 
 const auth =
   (...requiredRoles: string[]) =>
-
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       //get authorization token
       const token = req.headers.authorization?.split(' ')[1]; // Bearer <token>
 
-    // checking if the token is missing
-    if (!token) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
-    }
-
-    const decoded = jwtHelpers.verifyToken(
-      token,
-      config.jwt.secret as string
-    ) as JwtPayload;
-
-    const { userRole, userEmail, userId } = decoded;
-
-    // checking if the user is exist
-    const user = await prisma.users.findUnique({
-      where: {
-        email:userEmail,
+      // checking if the token is missing
+      if (!token) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
       }
-    })
 
-    if (!user) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'This user is not found !');
-    }
-    // checking if the user is already deleted
+      const decoded = jwtHelpers.verifyToken(
+        token,
+        config.jwt.secret as string,
+      ) as JwtPayload;
 
-    // const status = user?.status;
+      const { userRole, userEmail, userId } = decoded;
 
-    // if (status === 'BLOCKED') {
-    //   throw new ApiError(httpStatus.FORBIDDEN, 'This user is blocked !');
-    // }
+      // checking if the user is exist
+      const user = await prisma.user.findUnique({
+        where: {
+          email: userEmail,
+        },
+      });
 
-    // if (
-    //   user.passwordChangedAt &&
-    //   User.isJWTIssuedBeforePasswordChanged(
-    //     user.passwordChangedAt,
-    //     iat as number
-    //   )
-    // ) {
-    //   throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized !');
-    // }
+      if (!user) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'This user is not found !');
+      }
+      // checking if the user is already deleted
 
-    if (requiredRoles && !requiredRoles.includes(userRole)) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized');
-    }
+      // const status = user?.status;
 
-    req.user = decoded as JwtPayload;
-    next();
+      // if (status === 'BLOCKED') {
+      //   throw new ApiError(httpStatus.FORBIDDEN, 'This user is blocked !');
+      // }
+
+      // if (
+      //   user.passwordChangedAt &&
+      //   User.isJWTIssuedBeforePasswordChanged(
+      //     user.passwordChangedAt,
+      //     iat as number
+      //   )
+      // ) {
+      //   throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized !');
+      // }
+
+      if (requiredRoles && !requiredRoles.includes(userRole)) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized');
+      }
+
+      req.user = decoded as JwtPayload;
+      next();
     } catch (error) {
       next(error);
     }
